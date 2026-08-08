@@ -13,8 +13,8 @@ env:
 jobs:
   unit-testing:
     name: Unit Testing
-    if: always()
     strategy:
+      fail-fast: false
       matrix:
         nodejs_version: [18, 20]
         operating_system: [ubuntu-latest, macos-latest]
@@ -40,7 +40,7 @@ jobs:
         run: npm test
       
       - name: Archive Test Results
-        if: failure() && (steps.nodejs-unit-testing-step.outcome == 'success' || steps.nodejs-unit-testing-step.outcome == 'failure')
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: Mocha-Test-Results
