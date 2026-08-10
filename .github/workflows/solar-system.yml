@@ -75,8 +75,8 @@ jobs:
           --name mongo
     env:
       MONGO_URI: 'mongodb://mongo:27017/superData'
-      MONGO_INITDB_ROOT_USERNAME: non-prod-user
-      MONGO_INITDB_ROOT_PASSWORD: non-prod-password
+      MONGO_USERNAME: non-prod-user
+      MONGO_PASSWORD: non-prod-password
     container:
       image: node:18
 
