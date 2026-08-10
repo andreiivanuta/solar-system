@@ -62,23 +62,32 @@ jobs:
 
   code-coverage:
     name: Code Coverage
-    strategy:
-      matrix:
-        nodejs_version: [18, 20]
-        operating_system: [ubuntu-latest]
-    runs-on: ${{ matrix.operating_system }}
+    # strategy:
+    #   matrix:
+    #     nodejs_version: [18, 20]
+    #     operating_system: [ubuntu-latest]
+    # runs-on: ${{ matrix.operating_system }}
+    runs-on: ubuntu-latest
+    services:
+      mongo-db:
+        image: siddharth67/mongo-db:non-prod
+        options:
+          --name mongo
+        env:
+          MONGO_URI: 'mongodb://mongo:27017/superData'
+          MONGO_INITDB_ROOT_USERNAME: non-prod-user
+          MONGO_INITDB_ROOT_PASSWORD: non-prod-password
+    container:
+      image: node:18
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup NodeJS Version - ${{ matrix.nodejs_version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.nodejs_version }}
-
-
-
+      # - name: Setup NodeJS Version - ${{ matrix.nodejs_version }}
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: ${{ matrix.nodejs_version }}
 
       - name: Cache NPM dependencies
         uses: actions/cache@v3
