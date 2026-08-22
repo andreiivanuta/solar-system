@@ -236,6 +236,10 @@ jobs:
       - name: Deploy to Development Environment
         run: | 
             kubectl apply -f kubernetes/development/
+
+      - name: Wait for deployment rollout
+        run: |
+          kubectl -n ${{ vars.NAMESPACE }} rollout status deployment/solar-system --timeout=150s
       
       - name: Set App Ingress host URL
         id: set-ingress-host-address
@@ -253,7 +257,16 @@ jobs:
         env:
           URL: ${{needs.dev-deploy.outputs.APP_INGRESS_URL}}
         run: |
-          echo "Testing URL using curl and JQ"
-          echo $URL
+          echo "Testing URL: $URL"
           echo "--------------------------------"
-          curl -skL https://$URL/live | jq -r .status | grep -i live
+          for attempt in $(seq 1 10); do
+            body=$(curl -skL --max-time 10 "https://$URL/live" || true)
+            echo "Attempt $attempt response: $body"
+            if echo "$body" | jq -e -r '.status' 2>/dev/null | grep -iq live; then
+              echo "App is live"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::App did not report live in time"
+          exit 1
