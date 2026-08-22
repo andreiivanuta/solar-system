@@ -312,7 +312,7 @@ jobs:
         with:
           tokenPrefix: '${'
           tokenSuffix: '}'
-          files: '["kubernetes/production/*.yaml"]'
+          files: '["kubernetes/development/*.yaml"]'
         env:
           NAMESPACE: ${{ vars.NAMESPACE }}
           REPLICAS: ${{ vars.REPLICAS }}
@@ -321,13 +321,13 @@ jobs:
 
       - name: Check Manifest files after token replacement
         run: |
-          cat kubernetes/production/*.yaml
+          cat kubernetes/development/*.yaml
 
       - name: Check Files
         run: |
           ls -al
-          ls -al kubernetes/production/*.yaml
-          cat kubernetes/production/service.yaml
+          ls -al kubernetes/development/*.yaml
+          cat kubernetes/development/service.yaml
 
       - name: Create MongoDB Secret
         run: |
@@ -341,7 +341,7 @@ jobs:
 
       - name: Deploy to Production Environment
         run: | 
-            kubectl apply -f kubernetes/production/
+            kubectl apply -f kubernetes/development/
 
       - name: Wait for deployment rollout
         run: |
