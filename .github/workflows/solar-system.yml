@@ -175,7 +175,7 @@ jobs:
       uses: ./.github/workflows/reuse-deployment.yml
       secrets: 
         MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
-        k8s-kubeconfig: ${{ secrets.K8S_KUBECONFIG }}
+        k8s-kubeconfig: ${{ secrets.KUBECONFIG }}
       with:
         mongodb-uri: ${{ vars.MONGO_URI }}
         environment: development
@@ -212,7 +212,7 @@ jobs:
       uses: ./.github/workflows/reuse-deployment.yml
       secrets: 
         MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
-        k8s-kubeconfig: ${{ secrets.K8S_KUBECONFIG }}
+        k8s-kubeconfig: ${{ secrets.KUBECONFIG }}
       with:
         mongodb-uri: ${{ vars.MONGO_URI }}
         environment: production
