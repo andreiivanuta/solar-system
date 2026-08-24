@@ -9,6 +9,7 @@ jobs:
       outputs:
         APP_INGRESS_URL: ${{ steps.set-ingress-host-address.outputs.APP_INGRESS_HOST }}
 
+
       runs-on: ubuntu-latest
       steps:
         - name: Checkout Repo
@@ -79,3 +80,6 @@ jobs:
           id: set-ingress-host-address
           run: |
             echo "APP_INGRESS_HOST=$(kubectl -n ${{ vars.NAMESPACE }} get ingress solar-system -o jsonpath='{.spec.rules[0].host}')" >> "$GITHUB_OUTPUT"
+
+
+            
