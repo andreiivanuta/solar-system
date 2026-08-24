@@ -1,15 +1,38 @@
 name: Deployment - Reusable Workflow
 on:
   workflow_call:
+    inputs:
+        mongodb-uri:
+            description: 'MongoDB URI'
+            required: true
+            type: string
+        kubectl-version:
+            description: Provide the required Kubectl version
+            default: v1.36.0
+            required: false
+            type: string
+      
+        k8s-manifest-dir:
+            description: Directory containing Kubernetes manifests files
+            default: kubernetes/
+            required: true
+            type: string
+      
+        environment:
+            description: Provide the Deployment Environment
+            default: dev
+            required: true
+            type: string
     secrets:
-      MONGO_PASSWORD:
-        required: true
-      k8s-kubeconfig:
-        required: true      
+        MONGO_PASSWORD:
+          required: true
+        k8s-kubeconfig:
+            required: true
+      
 jobs:
     reuse-deploy:
       environment:
-        name: development
+        name: ${{ inputs.environment }}
         url: https://${{ steps.set-ingress-host-address.outputs.APP_INGRESS_HOST }}
       outputs:
         APP_INGRESS_URL: ${{ steps.set-ingress-host-address.outputs.APP_INGRESS_HOST }}
@@ -23,7 +46,7 @@ jobs:
         - name: Install kubectl
           uses: azure/setup-kubectl@v3
           with:
-            version: 'v1.36.1'
+            version: ${{ inputs.kubectl-version }}
 
         - name: Setup Kubeconfig
           uses: azure/k8s-set-context@v4
@@ -46,7 +69,7 @@ jobs:
           with:
             tokenPrefix: '${'
             tokenSuffix: '}'
-            files: '["kubernetes/development/*.yaml"]'
+            files: '["${{ inputs.k8s-manifest-dir }}/*.yaml"]'
           env:
             NAMESPACE: ${{ vars.NAMESPACE }}
             REPLICAS: ${{ vars.REPLICAS }}
@@ -55,18 +78,18 @@ jobs:
 
         - name: Check Manifest files after token replacement
           run: |
-            cat kubernetes/development/*.yaml
+            cat ${{ inputs.k8s-manifest-dir }}/*.yaml
 
         - name: Check Files
           run: |
             ls -al
-            ls -al kubernetes/development/*.yaml
-            cat kubernetes/development/service.yaml
+            ls -al ${{ inputs.k8s-manifest-dir }}/*.yaml
+            cat ${{ inputs.k8s-manifest-dir }}/service.yaml
 
         - name: Create MongoDB Secret
           run: |
             kubectl -n ${{ vars.NAMESPACE }} create secret generic mongo-db-creds \
-            --from-literal=MONGO_URI=${{ env.MONGO_URI }} \
+            --from-literal=MONGO_URI=${{ inputs.mongodb-uri }} \
             --from-literal=MONGO_USERNAME=${{ env.MONGO_USERNAME }} \
             --from-literal=MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
             --save-config \
@@ -75,7 +98,7 @@ jobs:
 
         - name: Deploy to Development Environment
           run: |
-            kubectl apply -f kubernetes/development/
+            kubectl apply -f ${{ inputs.k8s-manifest-dir }}/
 
         - name: Wait for deployment rollout
           run: |
