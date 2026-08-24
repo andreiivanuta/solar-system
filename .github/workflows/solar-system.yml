@@ -203,6 +203,9 @@ jobs:
       needs: docker
       name: Prod deploy
       uses: ./.github/workflows/reuse-deployment.yml
+      secrets: 
+        MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+        k8s-kubeconfig: ${{ secrets.K8S_KUBECONFIG }}
 
   prod-integration-testing:
     if: github.ref == 'refs/heads/main'

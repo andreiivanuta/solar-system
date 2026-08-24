@@ -1,6 +1,11 @@
 name: Deployment - Reusable Workflow
 on:
   workflow_call:
+    secrets:
+      MONGO_PASSWORD:
+        required: true
+      k8s-kubeconfig:
+        required: true      
 jobs:
     reuse-deploy:
       environment:
@@ -24,7 +29,7 @@ jobs:
           uses: azure/k8s-set-context@v4
           with:
             method: kubeconfig
-            kubeconfig: ${{ secrets.KUBECONFIG }}
+            kubeconfig: ${{ secrets.k8s-kubeconfig }}
 
         - name: Fetch Kubernetes config
           run: |
@@ -82,4 +87,3 @@ jobs:
             echo "APP_INGRESS_HOST=$(kubectl -n ${{ vars.NAMESPACE }} get ingress solar-system -o jsonpath='{.spec.rules[0].host}')" >> "$GITHUB_OUTPUT"
 
 
-            
