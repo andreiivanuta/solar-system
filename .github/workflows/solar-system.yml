@@ -173,6 +173,9 @@ jobs:
       name: Dev deploy
       needs: docker
       uses: ./.github/workflows/reuse-deployment.yml
+      secrets: 
+        MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+        k8s-kubeconfig: ${{ secrets.K8S_KUBECONFIG }}
 
   dev-integration-testing:
     if: contains(github.ref, 'feature/')
