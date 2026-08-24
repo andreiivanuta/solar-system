@@ -23,6 +23,10 @@ on:
             default: dev
             required: true
             type: string
+    outputs:
+        application-ingress-url:
+            description: The URL of the application ingress
+            value: ${{jobs.reuse-deploy.outputs.APP_INGRESS_URL}}
     secrets:
         MONGO_PASSWORD:
           required: true
