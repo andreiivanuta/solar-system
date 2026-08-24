@@ -109,11 +109,15 @@ jobs:
           path: coverage
           retention-days: 1
 
-  reports-s3:
+  reports-azure:
     needs: [code-coverage, unit-testing]
-    name: AWS S3 - Upload Reports
+    name: Azure Blob - Upload Reports
     runs-on: ubuntu-latest
-    continue-on-error: true
+    if: ${{ !cancelled() }}            # ← upload even when tests FAILED (but not if cancelled)
+    environment: test-results
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Download Mocha Test Artifact
         uses: actions/download-artifact@v4
@@ -127,16 +131,21 @@ jobs:
           pattern: Code-Coverage-Results-*
           merge-multiple: true
 
-      - name: Merge Test Files
+      - name: Merge test files
         run: |
-          ls -ltr
-          mkdir reports-${{ github.sha }}
-          mv cobertura-coverage.xml reports-${{ github.sha }}/
-          mv test-results.xml reports-${{ github.sha }}/
-          ls -ltr reports-${{ github.sha }}/
+          mkdir -p reports-${{ github.sha }}
+          mv cobertura-coverage.xml reports-${{ github.sha }}/ || echo "no coverage file"
+          mv test-results.xml       reports-${{ github.sha }}/ || echo "no test-results file"
 
-      - name: Upload to AWS S3
-        run: echo "uploading......"
+      - name: Upload test results to Azure Blob (keyless)
+        uses: andreiivanuta/azure-landing-zone/.github/actions/upload-test-results@main
+        with:
+          client-id:       ${{ vars.AZURE_CLIENT_ID_TEST_RESULTS }}
+          tenant-id:       ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          storage-account: ${{ vars.TEST_RESULTS_STORAGE_ACCOUNT_NAME }}
+          container:       ${{ vars.TEST_RESULTS_CONTAINER_NAME }}
+          source:          reports-${{ github.sha }}
 
   docker:
     name: Containerization
