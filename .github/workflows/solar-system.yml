@@ -39,14 +39,10 @@ jobs:
         with:
           node-version: ${{ matrix.nodejs_version }}
 
-      - name: Cache NPM dependencies
-        uses: actions/cache@v3
+      - name: Composite Action - Cache NPM dependencies
+        uses: ./solar-system/.github/custom-actions/npm-action/action.yml
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }} 
-
-      - name: Install Dependencies
-        run: npm install
+          path-of-folder: node_modules
 
       - name: Unit Testing
         id: nodejs-unit-testing-step
@@ -89,14 +85,10 @@ jobs:
       #   with:
       #     node-version: ${{ matrix.nodejs_version }}
 
-      - name: Cache NPM dependencies
-        uses: actions/cache@v3
+      - name: Composite Action - Cache NPM dependencies
+        uses: ./solar-system/.github/custom-actions/npm-action/action.yml
         with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }} 
-
-      - name: Install Dependencies
-        run: npm install
+          path-of-folder: node_modules
 
       - name: Check Code Coverage 
         continue-on-error: true
